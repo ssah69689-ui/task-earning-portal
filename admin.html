@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusWin - Secure Admin Portal</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: #0b0518; color: #f3f4f6; padding: 20px; min-height: 100vh; }
+        .glass { background: rgba(22, 10, 42, 0.95); border: 1px solid rgba(139, 92, 246, 0.4); border-radius: 16px; padding: 20px; max-width: 600px; margin: 0 auto; box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+        .input-field { background: #1e0f3c; border: 1px solid #7c3aed; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 10px; font-size: 13px; }
+        .btn { background: #dc2626; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn:hover { background: #b91c1c; }
+        .request-item { background: #1e0f3c; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #4c1d95; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <!-- Admin Login Box -->
+    <div id="adminLoginBox" class="glass" style="max-width: 350px; margin-top: 50px; text-align: center;">
+        <h2 style="margin-bottom: 15px; color: #f87171;">🔒 Admin Portal Login</h2>
+        <input type="text" id="adminUser" placeholder="Admin Username" class="input-field">
+        <input type="password" id="adminPass" placeholder="Admin Password" class="input-field">
+        <button onclick="loginAdmin()" class="btn" style="background: #7c3aed;">Access Panel</button>
+    </div>
+
+    <!-- Admin Dashboard (Hidden initially) -->
+    <div id="adminDashboard" class="glass" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="color: #fde047; font-size: 18px;">⚡ Admin Control Panel</h2>
+            <button onclick="location.reload()" style="background: #334155; color: white; border:none; padding: 5px 10px; border-radius: 6px; cursor:pointer; font-size: 11px;">Logout</button>
+        </div>
+        <p style="font-size: 12px; color: #c084fc; margin-bottom: 15px;">Pending UTR Deposits & Withdrawals Queue:</p>
+        <div id="requestsContainer">
+            <p style="color: #94a3b8; font-size: 12px; text-align: center;">No pending requests right now.</p>
+        </div>
+    </div>
+
+    <script>
+        function loginAdmin() {
+            const u = document.getElementById('adminUser').value.trim();
+            const p = document.getElementById('adminPass').value.trim();
+            
+            // Default Admin Credentials (Tu इसे बदल भी सकता है)
+            if(u === "admin" && p === "nexus@2026") {
+                document.getElementById('adminLoginBox').style.display = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
+                loadRequests();
+            } else {
+                alert("❌ Invalid Admin Credentials!");
+            }
+        }
+
+        function loadRequests() {
+            const container = document.getElementById('requestsContainer');
+            // LocalStorage से यूज़र के डिपॉजिट/विड्रॉल डेटा फेच करना
+            let requests = JSON.parse(localStorage.getItem('nexus_admin_requests')) || [];
+            
+            if(requests.length === 0) {
+                container.innerHTML = `<p style="color: #94a3b8; font-size: 12px; text-align: center;">No pending requests right now.</p>`;
+                return;
+            }
+
+            container.innerHTML = "";
+            requests.forEach((req, index) => {
+                container.innerHTML += `
+                    <div class="request-item">
+                        <div>
+                            <b style="color: #fde047;">${req.type.toUpperCase()}</b>: ₹${req.amount} <br>
+                            <span style="color: #c084fc;">UID: ${req.uid} | UTR/Details: ${req.detail}</span>
+                        </div>
+                        <button onclick="approveRequest(${index}, ${req.amount}, '${req.uid}')" style="background: #16a34a; color: white; border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight:bold;">Approve</button>
+                    </div>
+                `;
+            });
+        }
+
+        function approveRequest(index, amount, uid) {
+            let requests = JSON.parse(localStorage.getItem('nexus_admin_requests')) || [];
+            let users = JSON.parse(localStorage.getItem('nexus_users_db')) || [];
+            
+            // यूज़र का बैलेंस अपडेट करना
+            let targetUser = users.find(u => u.uid === uid);
+            if(targetUser) {
+                targetUser.balance += amount;
+                localStorage.setItem('nexus_users_db', JSON.stringify(users));
+            }
+
+            requests.splice(index, 1);
+            localStorage.setItem('nexus_admin_requests', JSON.stringify(requests));
+            alert(`✅ Request approved! ₹${amount} credited to UID: ${uid}`);
+            loadRequests();
+        }
+    </script>
+</body>
+</html>
