@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="hi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusWin Pro - Developed by Shubham Kumar Sah</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; background-color: #0d061f; color: #f3f4f6; }
+        .glass-card { background: rgba(26, 11, 46, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(124, 58, 237, 0.3); }
+        .glow-purple { box-shadow: 0 0 25px rgba(124, 58, 237, 0.4); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Top Navigation / Header -->
+    <header class="glass-card sticky top-0 z-50 px-4 py-3 flex justify-between items-center shadow-lg border-b border-purple-900/50">
+        <div class="flex items-center space-x-3">
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-2 rounded-xl text-white font-bold glow-purple">
+                🎮
+            </div>
+            <div>
+                <h1 class="font-bold text-lg bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">🚀 NexusWin Pro</h1>
+                <p class="text-xs text-purple-300">UID: <span id="headerUid" class="font-mono font-semibold">1268461</span></p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <div class="bg-purple-950/80 px-3 py-1.5 rounded-full border border-purple-700/50 flex items-center space-x-2">
+                💰 <span class="font-bold text-sm text-yellow-300" id="headerWallet">₹500.00</span>
+            </div>
+            <button onclick="toggleAdminModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                🛡️ Admin
+            </button>
+        </div>
+    </header>
+
+    <!-- Global Announcement Ticker -->
+    <div class="bg-purple-900/40 border-y border-purple-800/40 px-4 py-2 overflow-hidden whitespace-nowrap">
+        <div class="inline-block animate-marquee text-xs text-purple-200">
+            📢 <span id="announcementText">Welcome to NexusWin! Minimum deposit is ₹100. First deposit gets 2% extra bonus instantly! Developed by Shubham Kumar Sah</span>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-md w-full mx-auto p-4 pb-24 space-y-5">
+
+        <!-- Fake Live Winner Ticker -->
+        <div class="glass-card p-3 rounded-2xl flex items-center justify-between text-xs border border-purple-500/20">
+            <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-ping"></div>
+                <span class="text-purple-300 font-medium">🔥 Live Win:</span>
+            </div>
+            <span id="liveWinnerTicker" class="text-yellow-300 font-semibold truncate max-w-[220px]">UID ***482 won ₹5,400 in Lucky Number!</span>
+        </div>
+
+        <!-- Dashboard Banner / Quick Wallet Actions -->
+        <div class="glass-card p-5 rounded-3xl glow-purple relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-purple-600/20 rounded-full blur-2xl"></div>
+            <p class="text-xs text-purple-300 uppercase tracking-wider font-semibold">💎 Total Balance</p>
+            <h2 class="text-3xl font-extrabold text-white mt-1" id="mainBalance">₹500.00</h2>
+            <div class="grid grid-cols-2 gap-3 mt-4">
+                <button onclick="openDepositModal()" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white py-2.5 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center space-x-2">
+                    📥 <span>Deposit</span>
+                </button>
+                <button onclick="openWithdrawModal()" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white py-2.5 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center space-x-2">
+                    📤 <span>Withdraw</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Zones / Grid -->
+        <div class="grid grid-cols-2 gap-4">
+            <div onclick="playLuckyNumberGame()" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-purple-500 transition group text-center">
+                <div class="w-12 h-12 bg-purple-600/30 rounded-2xl mx-auto flex items-center justify-center text-purple-400 text-xl group-hover:scale-110 transition">
+                    🎲
+                </div>
+                <h3 class="font-bold text-sm mt-3 text-white">Lucky Number</h3>
+                <p class="text-[11px] text-purple-300 mt-0.5">Rigged House Win Mode</p>
+            </div>
+            <div onclick="playSpinWheel()" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-purple-500 transition group text-center">
+                <div class="w-12 h-12 bg-pink-600/30 rounded-2xl mx-auto flex items-center justify-center text-pink-400 text-xl group-hover:scale-110 transition">
+                    🎡
+                </div>
+                <h3 class="font-bold text-sm mt-3 text-white">Spin Wheel</h3>
+                <p class="text-[11px] text-purple-300 mt-0.5">Win up to ₹1000</p>
+            </div>
+        </div>
+
+        <!-- Referral & Ticket System Box -->
+        <div class="glass-card p-4 rounded-2xl border border-purple-500/30">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h4 class="font-bold text-sm text-white">🎟️ Referral Tickets</h4>
+                    <p class="text-xs text-purple-300 mt-0.5">Invite friends & get 1 free lucky ticket!</p>
+                </div>
+                <button onclick="shareReferralLink()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">🔗 Invite</button>
+            </div>
+        </div>
+
+        <!-- Customer Service Support Card -->
+        <div class="glass-card p-4 rounded-2xl">
+            <div class="flex justify-between items-center mb-3">
+                <h4 class="font-bold text-sm text-white">🎧 Support Chat</h4>
+                <span id="supportStatus" class="text-[10px] bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full font-semibold">🟢 Active</span>
+            </div>
+            <div id="chatBox" class="bg-purple-950/60 h-28 rounded-xl p-2.5 overflow-y-auto space-y-2 text-xs mb-2 border border-purple-900">
+                <div class="bg-purple-900/50 p-2 rounded-lg text-purple-200">🤖 Hello! Facing any issue with withdrawal or deposit? Send your UID here.</div>
+            </div>
+            <div class="flex space-x-2">
+                <input type="text" id="chatInput" placeholder="Type your query..." class="flex-grow bg-purple-950 border border-purple-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500">
+                <button onclick="sendSupportMessage()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">Send 📤</button>
+            </div>
+        </div>
+
+        <!-- Footer / Owner Branding -->
+        <div class="text-center py-4 border-t border-purple-900/60 mt-8">
+            <p class="text-xs text-purple-400 font-medium">✨ Developed by <span class="text-white font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Shubham Kumar Sah</span> ✨</p>
+            <p class="text-[10px] text-purple-500 mt-1">© 2026 NexusWin Portal. All rights reserved.</p>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="glass-card fixed bottom-0 left-0 right-0 max-w-md mx-auto py-2.5 px-6 flex justify-between items-center border-t border-purple-900/50 z-40">
+        <button onclick="switchTab('home')" class="text-purple-400 flex flex-col items-center text-xs space-y-1">🏠<span>Home</span></button>
+        <button onclick="switchTab('activity')" class="text-purple-400/60 hover:text-purple-400 flex flex-col items-center text-xs space-y-1">📊<span>Activity</span></button>
+        <button onclick="playSpinWheel()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-3 rounded-full -mt-6 shadow-lg glow-purple">🏆</button>
+        <button onclick="switchTab('promotion')" class="text-purple-400/60 hover:text-purple-400 flex flex-col items-center text-xs space-y-1">👥<span>Agency</span></button>
+        <button onclick="switchTab('profile')" class="text-purple-400/60 hover:text-purple-400 flex flex-col items-center text-xs space-y-1">👤<span>Account</span></button>
+    </nav>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-card p-6 rounded-3xl max-w-sm w-full border border-purple-500/40 relative">
+            <button onclick="closeDepositModal()" class="absolute top-4 right-4 text-purple-400 hover:text-white">❌</button>
+            <h3 class="font-bold text-lg text-white mb-2">📥 FamPay UPI Deposit</h3>
+            <p class="text-xs text-purple-300 mb-4">Scan QR or pay via UPI. First deposit gets 2% extra bonus instantly!</p>
+            <div class="bg-white p-4 rounded-2xl w-40 h-40 mx-auto flex items-center justify-center mb-4 text-black font-bold text-xs text-center border-2 border-purple-600">
+                [ QR CODE IMAGE ]
+            </div>
+            <input type="number" id="depositAmount" placeholder="Enter Amount (Min ₹100)" class="w-full bg-purple-950 border border-purple-800 rounded-xl px-3 py-2 text-xs text-white mb-3 focus:outline-none">
+            <input type="text" id="utrNumber" placeholder="Enter 12-digit UTR Number" class="w-full bg-purple-950 border border-purple-800 rounded-xl px-3 py-2 text-xs text-white mb-4 focus:outline-none">
+            <button onclick="submitDeposit()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl font-bold text-xs">🚀 Submit UTR (1 Hour Verification)</button>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="glass-card p-6 rounded-3xl max-w-lg w-full border border-purple-500/55 max-h-[90vh] overflow-y-auto relative">
+            <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-purple-400 hover:text-white">❌</button>
+            
+            <div class="flex items-center space-x-2 mb-4">
+                <div class="bg-red-600 text-white p-2 rounded-xl text-xs font-bold">🔒</div>
+                <div>
+                    <h3 class="font-bold text-base text-white">Super Admin Control Panel</h3>
+                    <p class="text-[10px] text-purple-300">👑 Developed by Shubham Kumar Sah</p>
+                </div>
+            </div>
+
+            <!-- House Profit Tracker -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="bg-purple-950/80 p-3 rounded-2xl border border-purple-800">
+                    <p class="text-[10px] text-purple-400">💵 Net House Profit</p>
+                    <h4 class="text-lg font-bold text-green-400 mt-1">₹14,850.00</h4>
+                </div>
+                <div class="bg-purple-950/80 p-3 rounded-2xl border border-purple-800">
+                    <p class="text-[10px] text-purple-400">⏳ Pending Requests</p>
+                    <h4 class="text-lg font-bold text-yellow-400 mt-1" id="pendingCount">3</h4>
+                </div>
+            </div>
+
+            <!-- UID Search & Troubleshooting Tool -->
+            <div class="bg-purple-950/60 p-4 rounded-2xl mb-4 border border-purple-900">
+                <h4 class="font-bold text-xs text-white mb-2">🔍 UID & Username Search</h4>
+                <div class="flex space-x-2">
+                    <input type="text" id="adminSearchInput" placeholder="Enter UID (e.g., 1268461)" class="flex-grow bg-purple-950 border border-purple-800 rounded-xl px-3 py-1.5 text-xs text-white">
+                    <button onclick="searchUserUid()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">Search</button>
+                </div>
+                <div id="searchResultBox" class="mt-3 text-xs text-purple-200 hidden bg-purple-900/40 p-3 rounded-xl">
+                    <!-- Dynamic User Info Displayed Here -->
+                </div>
+            </div>
+
+            <!-- Customer Service Ticket Manager with 'Success' Button -->
+            <div class="bg-purple-950/60 p-4 rounded-2xl mb-4 border border-purple-900">
+                <h4 class="font-bold text-xs text-white mb-2">🎫 Support Tickets & Success Action</h4>
+                <div class="space-y-2 text-xs">
+                    <div class="bg-purple-900/50 p-2.5 rounded-xl flex justify-between items-center">
+                        <div>
+                            <p class="font-semibold text-white">UID: 1268461 (Withdrawal Stuck)</p>
+                            <p class="text-[10px] text-purple-300">"Sir mere 500 nahi aaye"</p>
+                        </div>
+                        <button onclick="markSupportSuccess(this)" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg font-bold text-[10px]">✅ Success</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lucky Number Rig Control -->
+            <div class="bg-purple-950/60 p-4 rounded-2xl border border-purple-900">
+                <h4 class="font-bold text-xs text-white mb-2">⚙️ Lucky Number Rig Controller</h4>
+                <div class="flex space-x-2">
+                    <input type="number" id="rigNumber" placeholder="Set Winning Number (0-9)" class="flex-grow bg-purple-950 border border-purple-800 rounded-xl px-3 py-1.5 text-xs text-white">
+                    <button onclick="saveRigNumber()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">🔒 Lock Winner</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- External JavaScript Link -->
+    <script src="script.js"></script>
+</body>
+</html>
