@@ -3,94 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusWin - Secure Admin Portal</title>
+    <title>ShreeWin Pro - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background: #0b0518; color: #f3f4f6; padding: 20px; min-height: 100vh; }
-        .glass { background: rgba(22, 10, 42, 0.95); border: 1px solid rgba(139, 92, 246, 0.4); border-radius: 16px; padding: 20px; max-width: 600px; margin: 0 auto; box-shadow: 0 0 30px rgba(139,92,246,0.3); }
-        .input-field { background: #1e0f3c; border: 1px solid #7c3aed; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 10px; font-size: 13px; }
-        .btn { background: #dc2626; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
-        .btn:hover { background: #b91c1c; }
-        .request-item { background: #1e0f3c; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #4c1d95; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
-<body>
+<body class="min-h-screen p-4 pb-20">
 
-    <!-- Admin Login Box -->
-    <div id="adminLoginBox" class="glass" style="max-width: 350px; margin-top: 50px; text-align: center;">
-        <h2 style="margin-bottom: 15px; color: #f87171;">🔒 Admin Portal Login</h2>
-        <input type="text" id="adminUser" placeholder="Admin Username" class="input-field">
-        <input type="password" id="adminPass" placeholder="Admin Password" class="input-field">
-        <button onclick="loginAdmin()" class="btn" style="background: #7c3aed;">Access Panel</button>
+    <div class="max-w-md mx-auto space-y-6">
+        <div class="flex justify-between items-center">
+            <h2 class="text-xl font-bold text-purple-400">🛠️ Admin Dashboard</h2>
+            <a href="index.html" class="bg-slate-700 px-3 py-1 rounded text-xs">Back to Portal</a>
+        </div>
+
+        <!-- Daily Income Tracker -->
+        <div class="glass p-4 rounded-xl bg-gradient-to-r from-purple-900 to-indigo-900">
+            <p class="text-xs text-slate-300">Total Daily Income (Revenue)</p>
+            <h3 id="adminDailyIncome" class="text-2xl font-bold text-emerald-400">₹0.00</h3>
+        </div>
+
+        <!-- Customer Support Toggle Switch -->
+        <div class="glass p-4 rounded-xl flex justify-between items-center">
+            <div>
+                <h4 class="font-bold text-sm">Customer Service Status</h4>
+                <p class="text-xs text-slate-400">Turn support on/off for users</p>
+            </div>
+            <button id="supportToggleBtn" onclick="toggleSupportStatus()" class="px-4 py-2 rounded font-bold text-xs bg-emerald-600">ONLINE</button>
+        </div>
+
+        <!-- Admin Management (Add/Remove Admins) -->
+        <div class="glass p-4 rounded-xl space-y-3">
+            <h4 class="font-bold text-sm text-yellow-400">👥 Admin Management</h4>
+            <div class="flex space-x-2">
+                <input type="text" id="newAdminUser" class="w-full bg-slate-800 p-2 rounded text-sm text-white" placeholder="New Admin Username">
+                <button onclick="addNewAdmin()" class="bg-emerald-600 px-4 py-2 rounded text-sm font-bold">Add</button>
+            </div>
+            <div id="adminList" class="text-xs space-y-1 text-slate-300"></div>
+        </div>
+
+        <!-- User Balance Control (Add / Deduct) -->
+        <div class="glass p-4 rounded-xl space-y-3">
+            <h4 class="font-bold text-sm text-cyan-400">💰 User Balance Control</h4>
+            <input type="text" id="targetUserUid" class="w-full bg-slate-800 p-2 rounded text-sm text-white" placeholder="User UID">
+            <input type="number" id="targetBalanceAmount" class="w-full bg-slate-800 p-2 rounded text-sm text-white" placeholder="Amount (e.g. 500 or -200)">
+            <div class="flex space-x-2">
+                <button onclick="modifyUserBalance('add')" class="w-1/2 bg-emerald-600 py-2 rounded text-sm font-bold">Add Balance</button>
+                <button onclick="modifyUserBalance('deduct')" class="w-1/2 bg-red-600 py-2 rounded text-sm font-bold">Deduct Balance</button>
+            </div>
+        </div>
+
+        <!-- Pending Requests -->
+        <div class="glass p-4 rounded-xl space-y-3">
+            <h4 class="font-bold text-sm">📋 Transaction Requests</h4>
+            <div id="adminRequestsList" class="text-xs space-y-2 text-slate-300">No pending requests</div>
+        </div>
     </div>
 
-    <!-- Admin Dashboard (Hidden initially) -->
-    <div id="adminDashboard" class="glass" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2 style="color: #fde047; font-size: 18px;">⚡ Admin Control Panel</h2>
-            <button onclick="location.reload()" style="background: #334155; color: white; border:none; padding: 5px 10px; border-radius: 6px; cursor:pointer; font-size: 11px;">Logout</button>
-        </div>
-        <p style="font-size: 12px; color: #c084fc; margin-bottom: 15px;">Pending UTR Deposits & Withdrawals Queue:</p>
-        <div id="requestsContainer">
-            <p style="color: #94a3b8; font-size: 12px; text-align: center;">No pending requests right now.</p>
-        </div>
-    </div>
-
+    <script src="script.js"></script>
     <script>
-        function loginAdmin() {
-            const u = document.getElementById('adminUser').value.trim();
-            const p = document.getElementById('adminPass').value.trim();
-            
-            // Default Admin Credentials (Tu इसे बदल भी सकता है)
-            if(u === "admin" && p === "nexus@2026") {
-                document.getElementById('adminLoginBox').style.display = 'none';
-                document.getElementById('adminDashboard').style.display = 'block';
-                loadRequests();
-            } else {
-                alert("❌ Invalid Admin Credentials!");
-            }
-        }
-
-        function loadRequests() {
-            const container = document.getElementById('requestsContainer');
-            // LocalStorage से यूज़र के डिपॉजिट/विड्रॉल डेटा फेच करना
-            let requests = JSON.parse(localStorage.getItem('nexus_admin_requests')) || [];
-            
-            if(requests.length === 0) {
-                container.innerHTML = `<p style="color: #94a3b8; font-size: 12px; text-align: center;">No pending requests right now.</p>`;
-                return;
-            }
-
-            container.innerHTML = "";
-            requests.forEach((req, index) => {
-                container.innerHTML += `
-                    <div class="request-item">
-                        <div>
-                            <b style="color: #fde047;">${req.type.toUpperCase()}</b>: ₹${req.amount} <br>
-                            <span style="color: #c084fc;">UID: ${req.uid} | UTR/Details: ${req.detail}</span>
-                        </div>
-                        <button onclick="approveRequest(${index}, ${req.amount}, '${req.uid}')" style="background: #16a34a; color: white; border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight:bold;">Approve</button>
-                    </div>
-                `;
-            });
-        }
-
-        function approveRequest(index, amount, uid) {
-            let requests = JSON.parse(localStorage.getItem('nexus_admin_requests')) || [];
-            let users = JSON.parse(localStorage.getItem('nexus_users_db')) || [];
-            
-            // यूज़र का बैलेंस अपडेट करना
-            let targetUser = users.find(u => u.uid === uid);
-            if(targetUser) {
-                targetUser.balance += amount;
-                localStorage.setItem('nexus_users_db', JSON.stringify(users));
-            }
-
-            requests.splice(index, 1);
-            localStorage.setItem('nexus_admin_requests', JSON.stringify(requests));
-            alert(`✅ Request approved! ₹${amount} credited to UID: ${uid}`);
-            loadRequests();
-        }
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAdminData();
+        });
     </script>
 </body>
 </html>
