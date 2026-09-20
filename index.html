@@ -26,7 +26,7 @@
             </div>
 
             <div id="loginForm" class="space-y-3">
-                <input type="text" id="loginEmailOrPhone" placeholder="Phone Number / UID" class="w-full bg-purple-950/80 border border-purple-800/80 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
+                <input type="text" id="loginPhone" placeholder="Mobile Number / UID" class="w-full bg-purple-950/80 border border-purple-800/80 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
                 <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-purple-950/80 border border-purple-800/80 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
                 <div class="flex justify-between items-center text-[11px] text-purple-300">
                     <label class="flex items-center space-x-1"><input type="checkbox" class="accent-purple-600"><span>Remember</span></label>
@@ -60,20 +60,21 @@
                 <div class="bg-gradient-to-tr from-purple-600 to-pink-600 p-2 rounded-xl text-white font-bold glow-purple text-base">🎮</div>
                 <div>
                     <h1 class="font-bold text-base bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">NexusWin Pro</h1>
-                    <p class="text-[10px] text-purple-300">UID: <span id="headerUid" class="font-mono font-semibold">1268461</span></p>
+                    <p class="text-[10px] text-purple-300">UID: <span id="headerUid" class="font-mono font-semibold">---</span></p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
+                <button onclick="openNotificationModal()" class="bg-purple-950/80 hover:bg-purple-900 px-2.5 py-1.5 rounded-xl border border-purple-700/50 text-xs text-yellow-300 transition" title="Announcements">🔔</button>
                 <div class="bg-purple-950/80 px-3 py-1.5 rounded-full border border-purple-700/50 flex items-center space-x-1.5">
-                    <span>💰</span> <span class="font-bold text-xs text-yellow-300" id="headerWallet">₹500.00</span>
+                    <span>💰</span> <span class="font-bold text-xs text-yellow-300" id="headerWallet">₹0.00</span>
                 </div>
                 <button onclick="openAdminLoginModal()" class="bg-red-600/80 hover:bg-red-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold transition">🛡️ Admin</button>
             </div>
         </header>
 
-        <div class="bg-purple-900/40 border-y border-purple-800/40 px-4 py-1.5 overflow-hidden whitespace-nowrap">
+        <div onclick="openNotificationModal()" class="bg-purple-900/40 border-y border-purple-800/40 px-4 py-1.5 overflow-hidden whitespace-nowrap cursor-pointer">
             <div class="inline-block animate-marquee text-[11px] text-purple-200">
-                📢 <span>Welcome to NexusWin Pro! First deposit gets 2% instant bonus. Play Aviator & Lucky Number safely.</span>
+                📢 <span>[ANNOUNCEMENT] Welcome to NexusWin Pro! First deposit bonus active. Click here for latest updates.</span>
             </div>
         </div>
 
@@ -83,7 +84,7 @@
                 <div class="glass-card p-5 rounded-3xl glow-purple relative overflow-hidden">
                     <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-purple-600/20 rounded-full blur-2xl"></div>
                     <p class="text-xs text-purple-300 uppercase tracking-wider font-semibold">💎 Available Balance</p>
-                    <h2 class="text-3xl font-extrabold text-white mt-1" id="mainBalance">₹500.00</h2>
+                    <h2 class="text-3xl font-extrabold text-white mt-1" id="mainBalance">₹0.00</h2>
                     <div class="grid grid-cols-2 gap-3 mt-4">
                         <button onclick="openDepositModal()" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:opacity-90 text-white py-2.5 rounded-xl font-bold text-xs shadow-lg flex items-center justify-center space-x-1.5">
                             <span>📥</span> <span>Deposit</span>
@@ -113,7 +114,7 @@
                         <span class="text-[10px] bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full font-semibold">🟢 Online</span>
                     </div>
                     <div id="chatBox" class="bg-purple-950/60 h-24 rounded-xl p-2.5 overflow-y-auto space-y-2 text-[11px] mb-2 border border-purple-900">
-                        <div class="bg-purple-900/50 p-2 rounded-lg text-purple-200">🤖 Welcome to Support! Send your query or UTR issue here.</div>
+                        <div class="bg-purple-900/50 p-2 rounded-lg text-purple-200">🤖 Welcome! Send your UTR or query along with your UID.</div>
                     </div>
                     <div class="flex space-x-2">
                         <input type="text" id="chatInput" placeholder="Type message..." class="flex-grow bg-purple-950 border border-purple-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none">
@@ -137,12 +138,12 @@
                         <div class="bg-purple-950/60 p-3 rounded-xl border border-purple-900 text-left">
                             <p class="text-[10px] text-purple-300 mb-1">Bet Amount (₹)</p>
                             <input type="number" id="aviatorBet1" value="10" class="w-full bg-purple-900 border border-purple-800 rounded-lg p-1.5 text-xs text-white font-bold mb-2">
-                            <button id="aviatorBtn1" onclick="placeAviatorBet(1)" class="w-full bg-green-600 hover:bg-green-700 text-white py-1.5 rounded-lg text-xs font-bold">BET</button>
+                            <button onclick="placeAviatorBet(1)" class="w-full bg-green-600 hover:bg-green-700 text-white py-1.5 rounded-lg text-xs font-bold">BET</button>
                         </div>
                         <div class="bg-purple-950/60 p-3 rounded-xl border border-purple-900 text-left">
                             <p class="text-[10px] text-purple-300 mb-1">Bet Amount (₹)</p>
                             <input type="number" id="aviatorBet2" value="50" class="w-full bg-purple-900 border border-purple-800 rounded-lg p-1.5 text-xs text-white font-bold mb-2">
-                            <button id="aviatorBtn2" onclick="placeAviatorBet(2)" class="w-full bg-green-600 hover:bg-green-700 text-white py-1.5 rounded-lg text-xs font-bold">BET</button>
+                            <button onclick="placeAviatorBet(2)" class="w-full bg-green-600 hover:bg-green-700 text-white py-1.5 rounded-lg text-xs font-bold">BET</button>
                         </div>
                     </div>
                 </div>
@@ -151,9 +152,9 @@
             <div id="tab-promotion" class="tab-content space-y-4">
                 <div class="glass-card p-5 rounded-3xl text-center border border-purple-500/30">
                     <h3 class="font-bold text-base text-white mb-1">👥 Invite & Earn Agency</h3>
-                    <p class="text-xs text-purple-300 mb-3">Share your invite link & get rewards instantly.</p>
+                    <p class="text-xs text-purple-300 mb-3">Share your invite link & get referral rewards instantly.</p>
                     <div class="bg-purple-950 p-3 rounded-xl border border-purple-800 flex justify-between items-center mb-3">
-                        <span id="referralLinkText" class="text-xs font-mono text-yellow-300 truncate">https://nexuswin.app/ref=1268461</span>
+                        <span id="referralLinkText" class="text-xs font-mono text-yellow-300 truncate">https://nexuswin.app/ref=---</span>
                         <button onclick="copyReferralLink()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg text-xs font-bold">Copy</button>
                     </div>
                 </div>
@@ -164,8 +165,8 @@
                     <div class="flex items-center space-x-3 mb-4">
                         <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-xl font-bold">👤</div>
                         <div>
-                            <h3 class="font-bold text-sm text-white" id="profilePhone">+91 9876543210</h3>
-                            <p class="text-xs text-purple-300">UID: <span class="font-mono">1268461</span></p>
+                            <h3 class="font-bold text-sm text-white" id="profilePhone">+91 XXXXXXXXXX</h3>
+                            <p class="text-xs text-purple-300">UID: <span class="font-mono" id="profileUid">---</span></p>
                         </div>
                     </div>
                     <div class="space-y-2">
@@ -183,15 +184,32 @@
         </nav>
     </div>
 
+    <div id="notificationModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-card p-6 rounded-3xl max-w-sm w-full border border-purple-500/40 relative">
+            <button onclick="closeNotificationModal()" class="absolute top-4 right-4 text-purple-400 hover:text-white">❌</button>
+            <h3 class="font-bold text-base text-white mb-3">📢 Announcements & Updates</h3>
+            <div class="space-y-3 text-xs">
+                <div class="bg-purple-950 p-3 rounded-2xl border border-purple-800">
+                    <p class="font-bold text-yellow-300">🎉 Deposit Bonus Offer</p>
+                    <p class="text-[10px] text-purple-300 mt-1">Make your first deposit via official UPI and submit UTR to get instant 2% bonus added to your wallet.</p>
+                </div>
+                <div class="bg-purple-950 p-3 rounded-2xl border border-purple-800">
+                    <p class="font-bold text-pink-300">✈️ Aviator Game Rules</p>
+                    <p class="text-[10px] text-purple-300 mt-1">Place your bet, watch the multiplier rise, and cash out before the plane crashes to win big!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="glass-card p-6 rounded-3xl max-w-sm w-full border border-purple-500/40 relative">
             <button onclick="closeDepositModal()" class="absolute top-4 right-4 text-purple-400 hover:text-white">❌</button>
             <h3 class="font-bold text-base text-white mb-1">📥 Deposit Funds</h3>
-            <p class="text-xs text-purple-300 mb-3">Pay to UPI ID below & submit UTR. First deposit gets 2% bonus!</p>
+            <p class="text-xs text-purple-300 mb-3">Pay via UPI & submit UTR with your UID.</p>
             <div class="bg-purple-950 p-3.5 rounded-2xl border border-purple-700/50 mb-3 flex justify-between items-center">
                 <div>
                     <p class="text-[10px] text-purple-400">Official UPI ID</p>
-                    <p class="text-sm font-mono font-bold text-yellow-300">shubham@fampay</p>
+                    <p class="text-sm font-mono font-bold text-yellow-300">nexuswin@paytm</p>
                 </div>
                 <button onclick="copyUpi()" class="bg-purple-600 hover:bg-purple-700 text-white px-2.5 py-1.5 rounded-xl text-xs font-bold">Copy</button>
             </div>
@@ -207,7 +225,7 @@
             <h3 class="font-bold text-base text-white mb-1">📤 Withdraw Funds</h3>
             <p class="text-xs text-purple-300 mb-3">Enter amount and payout details.</p>
             <input type="number" id="withdrawAmount" placeholder="Withdraw Amount (₹)" class="w-full bg-purple-950 border border-purple-800 rounded-xl px-3 py-2 text-xs text-white mb-3 focus:outline-none">
-            <input type="text" id="withdrawUpi" placeholder="Enter UPI ID or Bank Account / IFSC" class="w-full bg-purple-950 border border-purple-800 rounded-xl px-3 py-2 text-xs text-white mb-4 focus:outline-none">
+            <input type="text" id="withdrawUpi" placeholder="Enter UPI ID or Bank Account" class="w-full bg-purple-950 border border-purple-800 rounded-xl px-3 py-2 text-xs text-white mb-4 focus:outline-none">
             <button onclick="submitWithdraw()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl font-bold text-xs">Submit Withdrawal Request</button>
         </div>
     </div>
@@ -217,7 +235,7 @@
             <button onclick="closeAdminLoginModal()" class="absolute top-4 right-4 text-purple-400 hover:text-white">❌</button>
             <h3 class="font-bold text-lg text-white mb-1">🛡️ Admin Portal Login</h3>
             <p class="text-xs text-purple-300 mb-4">Enter master admin password.</p>
-            <input type="password" id="adminPasswordInput" placeholder="Master Password (default: admin123)" class="w-full bg-purple-950 border border-purple-800 rounded-xl px-3 py-2.5 text-xs text-white mb-4 focus:outline-none">
+            <input type="password" id="adminPasswordInput" placeholder="Master Password (admin123)" class="w-full bg-purple-950 border border-purple-800 rounded-xl px-3 py-2.5 text-xs text-white mb-4 focus:outline-none">
             <button onclick="verifyAdminLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl font-bold text-xs">Access Admin Panel</button>
         </div>
     </div>
@@ -229,63 +247,14 @@
                 <div class="bg-red-600 text-white p-2 rounded-xl text-xs font-bold">🔒</div>
                 <div>
                     <h3 class="font-bold text-base text-white">Super Admin Control Panel</h3>
-                    <p class="text-[10px] text-purple-300">Manage deposits, withdrawals, support & system</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <div class="bg-purple-950 p-3 rounded-2xl border border-purple-800">
-                    <p class="text-[10px] text-purple-400">Total House Profit</p>
-                    <h4 class="text-lg font-bold text-green-400 mt-1">₹18,450.00</h4>
-                </div>
-                <div class="bg-purple-950 p-3 rounded-2xl border border-purple-800">
-                    <p class="text-[10px] text-purple-400">Pending Requests</p>
-                    <h4 id="adminPendingCount" class="text-lg font-bold text-yellow-400 mt-1">2</h4>
-                </div>
-            </div>
-
-            <div class="bg-purple-950/70 p-4 rounded-2xl mb-4 border border-purple-900">
-                <h4 class="font-bold text-xs text-white mb-2">➕ Add New Admin</h4>
-                <div class="flex space-x-2">
-                    <input type="text" id="newAdminUser" placeholder="New Admin Username" class="flex-grow bg-purple-950 border border-purple-800 rounded-xl px-3 py-1.5 text-xs text-white">
-                    <button onclick="addNewAdmin()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">Add Admin</button>
+                    <p class="text-[10px] text-purple-300">Manage deposits, withdrawals & requests</p>
                 </div>
             </div>
 
             <div class="bg-purple-950/70 p-4 rounded-2xl mb-4 border border-purple-900">
                 <h4 class="font-bold text-xs text-white mb-2">📥 UTR & Withdrawal Queue</h4>
                 <div id="adminRequestsList" class="space-y-2 text-xs">
-                    <div class="bg-purple-900/50 p-2.5 rounded-xl flex justify-between items-center">
-                        <div>
-                            <p class="font-semibold text-white">UID: 1268461 (Deposit ₹500)</p>
-                            <p class="text-[10px] text-yellow-300 font-mono">UTR: 489201928410</p>
-                        </div>
-                        <div class="space-x-1">
-                            <button onclick="approveRequest(this)" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-[10px] font-bold">Approve</button>
-                            <button onclick="rejectRequest(this)" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-[10px] font-bold">Reject</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-purple-950/70 p-4 rounded-2xl mb-4 border border-purple-900">
-                <h4 class="font-bold text-xs text-white mb-2">🎫 Support Tickets Manager</h4>
-                <div class="space-y-2 text-xs">
-                    <div class="bg-purple-900/50 p-2.5 rounded-xl flex justify-between items-center">
-                        <div>
-                            <p class="font-semibold text-white">UID: 1268461 (Stuck Payout)</p>
-                            <p class="text-[10px] text-purple-300">"Sir please check my UTR"</p>
-                        </div>
-                        <button onclick="markTicketSuccess(this)" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg font-bold text-[10px]">✅ Success</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-purple-950/70 p-4 rounded-2xl border border-purple-900">
-                <h4 class="font-bold text-xs text-white mb-2">⚙️ Lucky Number / Aviator Rig Control</h4>
-                <div class="flex space-x-2">
-                    <input type="number" id="rigValue" placeholder="Set Winning Multiplier / Number" class="flex-grow bg-purple-950 border border-purple-800 rounded-xl px-3 py-1.5 text-xs text-white">
-                    <button onclick="saveRigSettings()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">Lock Result</button>
+                    <p class="text-purple-400 text-[11px]">No pending requests right now.</p>
                 </div>
             </div>
         </div>
