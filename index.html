@@ -3,382 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusWin Pro - Elite Gaming & Earning Portal</title>
+    <title>ShreeWin Pro - User Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #0b0518; color: #f3f4f6; min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; }
-        .glass-card { background: rgba(22, 10, 42, 0.9); backdrop-filter: blur(16px); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 20px; padding: 16px; margin-bottom: 12px; }
-        .glow-purple { box-shadow: 0 0 30px rgba(139, 92, 246, 0.35); }
-        .tab-view { display: none; }
-        .tab-view.active { display: block; }
-        input, button { outline: none; border: none; }
-        .btn-primary { background: linear-gradient(135deg, #7c3aed, #db2777); color: white; font-weight: 600; padding: 12px; border-radius: 12px; width: 100%; cursor: pointer; text-align: center; }
-        .input-field { background: rgba(30, 15, 60, 0.9); border: 1px solid rgba(139, 92, 246, 0.4); color: white; padding: 12px; border-radius: 12px; width: 100%; font-size: 13px; margin-bottom: 10px; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
-        .modal-overlay.active { display: flex; }
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
-<body>
+<body class="min-h-screen pb-20">
 
-    <!-- ================= AUTH SYSTEM ================= -->
-    <div id="authContainer" style="position: fixed; inset: 0; background: #0b0518; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px;">
-        <div class="glass-card glow-purple" style="max-width: 360px; width: 100%;">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div style="font-size: 36px; margin-bottom: 8px;">💎</div>
-                <h2 id="authTitle" style="font-size: 22px; font-weight: 700; color: white;">NexusWin Login</h2>
-                <p id="authSubtitle" style="font-size: 11px; color: #c084fc; margin-top: 4px;">Enter your unique username & password</p>
-            </div>
-
-            <!-- Login Form -->
-            <div id="loginForm">
-                <input type="text" id="loginUsername" placeholder="Unique Username" class="input-field">
-                <input type="password" id="loginPassword" placeholder="Password" class="input-field">
-                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #c084fc; margin-bottom: 12px;">
-                    <label><input type="checkbox"> Remember me</label>
-                    <span onclick="switchAuthMode('forgot')" style="color: #f472b6; cursor: pointer;">Forgot Password?</span>
-                </div>
-                <button onclick="handleLogin()" class="btn-primary">Login 🔓</button>
-                <p style="text-align: center; font-size: 12px; color: #c084fc; margin-top: 14px;">Don't have an account? <span onclick="switchAuthMode('register')" style="color: #f472b6; font-weight: 700; cursor: pointer;">Register</span></p>
-            </div>
-
-            <!-- Register Form (Strictly ₹0 Balance) -->
-            <div id="registerForm" style="display: none;">
-                <input type="text" id="regUsername" placeholder="Create Unique Username" class="input-field">
-                <input type="password" id="regPassword" placeholder="Create Password" class="input-field">
-                <input type="text" id="regInvite" placeholder="Invite Code (Optional)" class="input-field">
-                <div style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.4); padding: 8px; border-radius: 8px; font-size: 10px; color: #fde047; margin-bottom: 10px;">
-                    ℹ️ New account opening balance is strictly <b>₹0.00</b> (No registration bonus).
-                </div>
-                <button onclick="handleRegister()" class="btn-primary" style="background: linear-gradient(135deg, #16a34a, #0d9488);">Register Account 📝</button>
-                <p style="text-align: center; font-size: 12px; color: #c084fc; margin-top: 14px;">Already registered? <span onclick="switchAuthMode('login')" style="color: #c084fc; font-weight: 700; cursor: pointer;">Login here</span></p>
-            </div>
-
-            <!-- Forgot Password with OTP -->
-            <div id="forgotForm" style="display: none;">
-                <input type="text" id="forgotUsername" placeholder="Enter Registered Username" class="input-field">
-                <div style="display: flex; gap: 8px;">
-                    <input type="text" id="otpInput" placeholder="6-digit OTP" class="input-field">
-                    <button onclick="sendOtp()" style="background: #7c3aed; color: white; padding: 0 12px; border-radius: 12px; font-size: 11px; font-weight: 600; cursor: pointer; height: 42px;">Send OTP</button>
-                </div>
-                <input type="password" id="newPassword" placeholder="Enter New Password" class="input-field">
-                <button onclick="handleResetPassword()" class="btn-primary" style="background: linear-gradient(135deg, #ca8a04, #d97706);">Reset Password 🔄</button>
-                <p style="text-align: center; font-size: 12px; color: #c084fc; margin-top: 14px;"><span onclick="switchAuthMode('login')" style="color: #c084fc; font-weight: 700; cursor: pointer;">Back to Login</span></p>
-            </div>
+    <!-- Top Header -->
+    <header class="glass sticky top-0 z-50 p-4 flex justify-between items-center shadow-lg">
+        <span class="text-xl font-bold text-yellow-400">🚀 ShreeWin Pro</span>
+        <div class="flex items-center space-x-3">
+            <span id="userBalanceDisplay" class="bg-emerald-600 px-3 py-1 rounded-full text-sm font-semibold">₹0.00</span>
+            <a href="admin.html" class="bg-purple-600 px-3 py-1 rounded text-xs font-bold">Admin Panel</a>
         </div>
-    </div>
+    </header>
 
-    <!-- ================= MAIN APP INTERFACE ================= -->
-    <div id="appContainer" style="display: none; flex-direction: column; min-height: 100vh;">
-
-        <!-- Header -->
-        <header class="glass-card" style="position: sticky; top: 0; z-index: 40; display: flex; justify-content: space-between; align-items: center; margin: 0; border-radius: 0; border-bottom: 1px solid rgba(139, 92, 246, 0.3);">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="background: linear-gradient(135deg, #7c3aed, #db2777); padding: 8px 10px; border-radius: 12px; font-weight: 700;">🎮</div>
+    <!-- Main Container -->
+    <main class="max-w-md mx-auto p-4 space-y-6">
+        
+        <!-- User Profile Card -->
+        <div class="glass p-4 rounded-xl flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center font-bold text-xl">S</div>
                 <div>
-                    <h1 style="font-size: 15px; font-weight: 700; background: linear-gradient(90deg, #c084fc, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">NexusWin Pro</h1>
-                    <p style="font-size: 10px; color: #c084fc;">UID: <span id="headerUid" style="font-family: monospace; font-weight: 600;">---</span></p>
+                    <h3 id="profileName" class="font-bold text-lg">Shubham Kumar</h3>
+                    <p class="text-xs text-slate-400">UID: <span id="profileUid">1268461</span></p>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <button onclick="openNotificationModal()" style="background: rgba(30, 15, 60, 0.8); border: 1px solid rgba(139, 92, 246, 0.4); padding: 6px 10px; border-radius: 10px; color: #fde047; font-size: 12px; cursor: pointer;">🔔</button>
-                <div style="background: rgba(30, 15, 60, 0.8); border: 1px solid rgba(139, 92, 246, 0.4); padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px;">
-                    <span>💰</span> <span id="headerWallet" style="font-weight: 700; font-size: 12px; color: #fde047;">₹0.00</span>
-                </div>
-            </div>
-        </header>
-
-        <!-- Announcement Ticker -->
-        <div onclick="openNotificationModal()" style="background: rgba(107, 33, 168, 0.25); border-bottom: 1px solid rgba(139, 92, 246, 0.3); padding: 8px 16px; font-size: 11px; color: #e9d5ff; white-space: nowrap; overflow: hidden; cursor: pointer;">
-            📢 <span>[ANNOUNCEMENT] Welcome to NexusWin Pro! Deposit & instant withdrawals active via Account section.</span>
+            <button onclick="logoutUser()" class="text-xs bg-red-600 px-3 py-1.5 rounded">Logout</button>
         </div>
 
-        <!-- MAIN VIEWS -->
-        <main style="flex-grow: 1; max-width: 440px; width: 100%; margin: 0 auto; padding: 16px; padding-bottom: 100px;">
+        <!-- Wallet Actions (Deposit & Withdraw) -->
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="openDepositModal()" class="bg-emerald-600 hover:bg-emerald-500 p-3 rounded-xl font-semibold text-center shadow">Deposit (UPI)</button>
+            <button onclick="openWithdrawModal()" class="bg-blue-600 hover:bg-blue-500 p-3 rounded-xl font-semibold text-center shadow">Withdraw</button>
+        </div>
 
-            <!-- 1. HOME VIEW -->
-            <div id="view-home" class="tab-view active">
-                <div class="glass-card glow-purple" style="position: relative; overflow: hidden;">
-                    <p style="font-size: 11px; color: #c084fc; text-transform: uppercase; font-weight: 600;">💎 Main Wallet Balance</p>
-                    <h2 id="mainBalance" style="font-size: 28px; font-weight: 800; color: white; margin-top: 4px;">₹0.00</h2>
-                    <p style="font-size: 10px; color: #c084fc; margin-top: 6px;">💡 Deposit & Withdrawals are securely located inside your <b>Account</b> section.</p>
+        <!-- Games Section -->
+        <div class="space-y-4">
+            <h2 class="text-lg font-bold text-yellow-400">🎮 Featured Games</h2>
+            
+            <!-- Aviator Game -->
+            <div class="glass p-4 rounded-xl space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-red-500">✈️ Aviator Pro</h3>
+                    <span id="aviatorMultiplier" class="text-xl font-extrabold text-emerald-400">1.00x</span>
                 </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                    <div onclick="switchTab('aviator')" class="glass-card" style="text-align: center; cursor: pointer; margin-bottom: 0;">
-                        <div style="font-size: 28px; margin-bottom: 6px;">✈️</div>
-                        <h3 style="font-size: 13px; font-weight: 700; color: white;">Aviator Crash</h3>
-                        <p style="font-size: 10px; color: #c084fc;">High Multiplier Game</p>
-                    </div>
-                    <div onclick="playLuckyNumberGame()" class="glass-card" style="text-align: center; cursor: pointer; margin-bottom: 0;">
-                        <div style="font-size: 28px; margin-bottom: 6px;">🎲</div>
-                        <h3 style="font-size: 13px; font-weight: 700; color: white;">Lucky Number</h3>
-                        <p style="font-size: 10px; color: #c084fc;">Guess 0-9 & Win</p>
-                    </div>
-                </div>
-
-                <div class="glass-card" style="text-align: center;">
-                    <h4 style="font-size: 13px; font-weight: 700; color: #fde047; margin-bottom: 4px;">🔥 Daily Earning Tournament</h4>
-                    <p style="font-size: 11px; color: #c084fc;">Play Aviator & win up to ₹10,000 daily leaderboard cash prizes.</p>
+                <div class="flex space-x-2">
+                    <input type="number" id="aviatorBetAmount" value="10" class="w-1/2 bg-slate-800 p-2 rounded border border-slate-700 text-sm" placeholder="Bet Amount">
+                    <button onclick="placeAviatorBet()" class="w-1/2 bg-red-600 hover:bg-red-500 py-2 rounded font-bold">Place Bet</button>
                 </div>
             </div>
 
-            <!-- 2. ACTIVITY VIEW -->
-            <div id="view-activity" class="tab-view">
-                <div class="glass-card">
-                    <h3 style="font-size: 15px; font-weight: 700; color: white; margin-bottom: 10px;">🎁 Daily Events & Rewards</h3>
-                    <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
-                        <div style="background: rgba(30, 15, 60, 0.8); padding: 12px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <p style="font-weight: 700; color: #fde047;">First Deposit Bonus</p>
-                                <p style="font-size: 10px; color: #c084fc;">Get +2% extra on your first UTR deposit.</p>
-                            </div>
-                            <button onclick="switchTab('account')" style="background: #7c3aed; color: white; padding: 6px 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Deposit</button>
-                        </div>
-                        <div style="background: rgba(30, 15, 60, 0.8); padding: 12px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <p style="font-weight: 700; color: #f472b6;">Redeem Gift Code</p>
-                                <p style="font-size: 10px; color: #c084fc;">Claim free bonus vouchers.</p>
-                            </div>
-                            <button onclick="openGiftModal()" style="background: #db2777; color: white; padding: 6px 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Redeem</button>
-                        </div>
-                    </div>
-                </div>
+            <!-- Lottery Game (Min ₹10, 2x Multiplier) -->
+            <div class="glass p-4 rounded-xl space-y-3">
+                <h3 class="font-bold text-yellow-400">🎟️ 2x Lottery (Min ₹10)</h3>
+                <input type="number" id="lotteryAmount" min="10" value="10" class="w-full bg-slate-800 p-2 rounded border border-slate-700 text-sm" placeholder="Enter Ticket Price (Min 10)">
+                <button onclick="playLottery()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 py-2 rounded font-bold">Buy Ticket & Win 2x</button>
             </div>
+        </div>
 
-            <!-- 3. WIN / FAST PREDICTION VIEW -->
-            <div id="view-win" class="tab-view">
-                <div class="glass-card" style="text-align: center;">
-                    <h3 style="font-size: 16px; font-weight: 700; color: white; margin-bottom: 6px;">⚡ Fast Color & Number Spin</h3>
-                    <p style="font-size: 11px; color: #c084fc; margin-bottom: 14px;">Predict correctly and double your funds instantly.</p>
-                    <div style="background: rgba(30, 15, 60, 0.9); padding: 24px; border-radius: 16px; border: 1px solid rgba(139, 92, 246, 0.4); margin-bottom: 14px;">
-                        <div style="font-size: 36px; margin-bottom: 8px;">🎡</div>
-                        <p style="font-size: 13px; font-weight: 700; color: #fde047;">Next Round Starting Soon...</p>
-                    </div>
-                    <button onclick="alert('Place bets from wallet balance!')" class="btn-primary">Play Now</button>
-                </div>
+        <!-- Customer Service & Progress Query -->
+        <div class="glass p-4 rounded-xl space-y-3">
+            <h3 class="font-bold text-purple-400">🎧 Customer Service & Tickets</h3>
+            <div id="supportStatusBanner" class="text-xs bg-emerald-900 text-emerald-300 p-2 rounded">Support is Online (24/7)</div>
+            <textarea id="supportQueryText" class="w-full bg-slate-800 p-2 rounded border border-slate-700 text-sm" placeholder="Write your problem..." rows="2"></textarea>
+            <button onclick="submitSupportTicket()" class="w-full bg-purple-600 hover:bg-purple-500 py-2 rounded font-bold text-sm">Submit Progress Query</button>
+        </div>
+
+        <!-- Gift Code Section -->
+        <div class="glass p-4 rounded-xl space-y-3">
+            <h3 class="font-bold text-pink-400">🎁 Gift Code Redemption</h3>
+            <div class="flex space-x-2">
+                <input type="text" id="giftCodeInput" class="w-3/4 bg-slate-800 p-2 rounded border border-slate-700 text-sm uppercase" placeholder="Enter Code">
+                <button onclick="claimGiftCode()" class="w-1/4 bg-pink-600 hover:bg-pink-500 py-2 rounded font-bold text-sm">Receive</button>
             </div>
+        </div>
 
-            <!-- 4. PROMOTION (AGENCY) VIEW -->
-            <div id="view-promotion" class="tab-view">
-                <div class="glass-card">
-                    <h3 style="font-size: 15px; font-weight: 700; color: white; text-align: center; margin-bottom: 12px;">👥 Invite & Earn Agency</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center; margin-bottom: 12px;">
-                        <div style="background: rgba(30, 15, 60, 0.8); padding: 12px; border-radius: 14px; border: 1px solid rgba(139, 92, 246, 0.3);">
-                            <p style="font-size: 10px; color: #c084fc;">Direct Subordinates</p>
-                            <p style="font-size: 18px; font-weight: 800; color: white; margin-top: 4px;">0</p>
-                            <p style="font-size: 9px; color: #a78bfa; margin-top: 2px;">Register: 0 | Deposit: 0</p>
-                        </div>
-                        <div style="background: rgba(30, 15, 60, 0.8); padding: 12px; border-radius: 14px; border: 1px solid rgba(139, 92, 246, 0.3);">
-                            <p style="font-size: 10px; color: #c084fc;">Team Subordinates</p>
-                            <p style="font-size: 18px; font-weight: 800; color: white; margin-top: 4px;">0</p>
-                            <p style="font-size: 9px; color: #a78bfa; margin-top: 2px;">Register: 0 | Deposit: 0</p>
-                        </div>
-                    </div>
-                    <div style="background: rgba(30, 15, 60, 0.9); padding: 10px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.4); display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <span id="agencyInviteLink" style="font-size: 11px; font-family: monospace; color: #fde047; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px;">nexuswin.app?ref=---</span>
-                        <button onclick="copyAgencyLink()" style="background: #7c3aed; color: white; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap;">Copy</button>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
-                        <div onclick="alert('Partner rewards: Earn 1% commission on all tier bets!')" style="background: rgba(30, 15, 60, 0.8); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                            <span>🤝 Partner Rewards</span> <span style="color: #c084fc;">›</span>
-                        </div>
-                        <div onclick="alert('Commission details will update live.')" style="background: rgba(30, 15, 60, 0.8); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                            <span>📊 Commission Detail</span> <span style="color: #c084fc;">›</span>
-                        </div>
-                        <div onclick="alert('Invitation rules: Share code with friends.')" style="background: rgba(30, 15, 60, 0.8); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                            <span>📜 Invitation Rules</span> <span style="color: #c084fc;">›</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    </main>
 
-            <!-- 5. ACCOUNT VIEW -->
-            <div id="view-account" class="tab-view">
-                <div class="glass-card" style="display: flex; flex-direction: column; gap: 14px;">
-                    <!-- Profile Header -->
-                    <div style="display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(139, 92, 246, 0.3);">
-                        <div style="width: 52px; height: 52px; background: linear-gradient(135deg, #7c3aed, #db2777); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700;">👑</div>
-                        <div>
-                            <h3 id="accUsername" style="font-size: 14px; font-weight: 700; color: white;">username</h3>
-                            <p style="font-size: 11px; color: #c084fc;">UID | <span id="accUid" style="font-family: monospace; font-weight: 600;">---</span> <button onclick="copyUid()" style="background: none; color: #fde047; cursor: pointer; margin-left: 4px;">📋</button></p>
-                            <p style="font-size: 9px; color: #a78bfa; margin-top: 2px;">Last login: <span id="accLastLogin">2026-09-20</span></p>
-                        </div>
-                    </div>
-
-                    <!-- Total Balance & Wallet Buttons -->
-                    <div style="background: rgba(30, 15, 60, 0.85); padding: 14px; border-radius: 16px; border: 1px solid rgba(139, 92, 246, 0.4);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <div>
-                                <p style="font-size: 10px; color: #c084fc; text-transform: uppercase; font-weight: 600;">Total balance</p>
-                                <h3 id="accBalance" style="font-size: 24px; font-weight: 800; color: white; margin-top: 2px;">₹0.00</h3>
-                            </div>
-                            <button onclick="alert('Wallet is synchronized in real-time.')" style="background: rgba(124, 58, 237, 0.8); color: white; padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; cursor: pointer;">Enter wallet</button>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; font-size: 11px;">
-                            <div onclick="alert('ARWallet active')" style="background: rgba(20, 10, 40, 0.8); padding: 8px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); cursor: pointer;"><div style="font-size: 16px;">💳</div><span style="font-size: 9px; color: #c084fc;">ARWallet</span></div>
-                            <div onclick="openDepositModal()" style="background: rgba(20, 10, 40, 0.8); padding: 8px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); cursor: pointer;"><div style="font-size: 16px;">📥</div><span style="font-size: 9px; color: #c084fc;">Deposit</span></div>
-                            <div onclick="openWithdrawModal()" style="background: rgba(20, 10, 40, 0.8); padding: 8px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); cursor: pointer;"><div style="font-size: 16px;">📤</div><span style="font-size: 9px; color: #c084fc;">Withdraw</span></div>
-                            <div onclick="alert('VIP Level 1 Active')" style="background: rgba(20, 10, 40, 0.8); padding: 8px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); cursor: pointer;"><div style="font-size: 16px;">💎</div><span style="font-size: 9px; color: #c084fc;">VIP</span></div>
-                        </div>
-                    </div>
-
-                    <!-- History Blocks -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
-                        <div onclick="alert('Game history is empty.')" style="background: rgba(30, 15, 60, 0.8); padding: 10px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <span style="font-size: 16px;">📊</span><div><p style="font-weight: 700; color: white;">Game History</p><p style="font-size: 8px; color: #a78bfa;">My game history</p></div>
-                        </div>
-                        <div onclick="alert('Transaction history is clean.')" style="background: rgba(30, 15, 60, 0.8); padding: 10px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <span style="font-size: 16px;">📑</span><div><p style="font-weight: 700; color: white;">Transaction</p><p style="font-size: 8px; color: #a78bfa;">My transaction</p></div>
-                        </div>
-                        <div onclick="alert('Deposit history synchronized.')" style="background: rgba(30, 15, 60, 0.8); padding: 10px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <span style="font-size: 16px;">📥</span><div><p style="font-weight: 700; color: white;">Deposit</p><p style="font-size: 8px; color: #a78bfa;">My deposit history</p></div>
-                        </div>
-                        <div onclick="alert('Withdraw history synchronized.')" style="background: rgba(30, 15, 60, 0.8); padding: 10px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <span style="font-size: 16px;">📤</span><div><p style="font-weight: 700; color: white;">Withdraw</p><p style="font-size: 8px; color: #a78bfa;">My withdraw history</p></div>
-                        </div>
-                    </div>
-
-                    <!-- Features List -->
-                    <div style="display: flex; flex-direction: column; gap: 6px; font-size: 11px;">
-                        <div onclick="openNotificationModal()" style="background: rgba(30, 15, 60, 0.8); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                            <span>🔔 Notification</span> <span style="color: #c084fc;">›</span>
-                        </div>
-                        <div onclick="openGiftModal()" style="background: rgba(30, 15, 60, 0.8); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                            <span>🎁 Gifts & Redeem Code</span> <span style="color: #c084fc;">›</span>
-                        </div>
-                        <div onclick="alert('No top-up coupons available.')" style="background: rgba(30, 15, 60, 0.8); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                            <span>🎟️ My Top-Up Coupons</span> <span style="color: #c084fc;">›</span>
-                        </div>
-                        <div onclick="alert('Win rate: 50%')" style="background: rgba(30, 15, 60, 0.8); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                            <span>📈 Game Statistics</span> <span style="color: #c084fc;">›</span>
-                        </div>
-                        <div onclick="alert('Language: English / Hindi')" style="background: rgba(30, 15, 60, 0.8); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                            <span>🌐 Language</span> <span style="color: #c084fc;">English ›</span>
-                        </div>
-                    </div>
-
-                    <!-- Service Center -->
-                    <div>
-                        <p style="font-size: 11px; font-weight: 700; color: #c084fc; text-transform: uppercase; margin-bottom: 8px;">Service Center</p>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; font-size: 11px;">
-                            <div onclick="alert('Settings configured')" style="background: rgba(30, 15, 60, 0.8); padding: 8px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); cursor: pointer;">⚙️<p style="font-size: 9px; color: #e9d5ff; margin-top: 2px;">Settings</p></div>
-                            <div onclick="alert('Feedback sent successfully')" style="background: rgba(30, 15, 60, 0.8); padding: 8px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); cursor: pointer;">💬<p style="font-size: 9px; color: #e9d5ff; margin-top: 2px;">Feedback</p></div>
-                            <div onclick="openNotificationModal()" style="background: rgba(30, 15, 60, 0.8); padding: 8px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); cursor: pointer;">📢<p style="font-size: 9px; color: #e9d5ff; margin-top: 2px;">Announcement</p></div>
-                            <div onclick="openSupportModal()" style="background: rgba(30, 15, 60, 0.8); padding: 8px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); cursor: pointer;">🎧<p style="font-size: 9px; color: #e9d5ff; margin-top: 2px;">Customer CS</p></div>
-                            <div onclick="alert('Beginner guide: Deposit min ₹100, play games & withdraw.')" style="background: rgba(30, 15, 60, 0.8); padding: 8px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); cursor: pointer;">📖<p style="font-size: 9px; color: #e9d5ff; margin-top: 2px;">Guide</p></div>
-                            <div onclick="alert('NexusWin Pro v3.0 - Production Ready')" style="background: rgba(30, 15, 60, 0.8); padding: 8px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); cursor: pointer;">ℹ️<p style="font-size: 9px; color: #e9d5ff; margin-top: 2px;">About us</p></div>
-                        </div>
-                    </div>
-
-                    <button onclick="handleLogout()" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; width: 100%;">Logout 🚪</button>
-                </div>
-            </div>
-
-            <!-- AVIATOR GAME VIEW -->
-            <div id="view-aviator" class="tab-view">
-                <div class="glass-card" style="text-align: center; border: 1px solid rgba(239, 68, 68, 0.4);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <button onclick="switchTab('home')" style="background: none; color: #c084fc; font-size: 12px; cursor: pointer;">‹ Back</button>
-                        <span style="font-size: 12px; font-weight: 700; color: #f87171;">✈️ AVIATOR CRASH</span>
-                        <span id="aviatorStatus" style="font-size: 11px; background: rgba(234, 179, 8, 0.2); color: #fde047; padding: 2px 8px; border-radius: 6px; font-family: monospace;">Waiting...</span>
-                    </div>
-                    <div style="background: rgba(30, 15, 60, 0.9); height: 180px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(139, 92, 246, 0.4); margin-bottom: 12px;">
-                        <div style="font-size: 36px; margin-bottom: 4px;">✈️</div>
-                        <h2 id="multiplierDisplay" style="font-size: 32px; font-weight: 900; font-family: monospace; color: white;">1.00x</h2>
-                        <p style="font-size: 10px; color: #c084fc; margin-top: 4px;">Fly high, cash out before crash!</p>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left;">
-                        <div style="background: rgba(30, 15, 60, 0.8); padding: 10px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3);">
-                            <p style="font-size: 10px; color: #c084fc; margin-bottom: 4px;">Bet Amount (₹)</p>
-                            <input type="number" id="aviatorBet1" value="10" class="input-field" style="margin-bottom: 8px;">
-                            <button onclick="placeAviatorBet()" style="background: #16a34a; color: white; padding: 8px; border-radius: 8px; font-weight: 700; width: 100%; font-size: 11px; cursor: pointer;">BET</button>
-                        </div>
-                        <div style="background: rgba(30, 15, 60, 0.8); padding: 10px; border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3);">
-                            <p style="font-size: 10px; color: #c084fc; margin-bottom: 4px;">Cashout Multiplier</p>
-                            <input type="number" id="cashoutAt" value="2.00" step="0.1" class="input-field" style="margin-bottom: 8px;">
-                            <button onclick="cashOutBet()" style="background: #ca8a04; color: white; padding: 8px; border-radius: 8px; font-weight: 700; width: 100%; font-size: 11px; cursor: pointer;">CASHOUT</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- 5-Star Bottom Navigation Bar -->
-        <nav class="glass-card" style="position: fixed; bottom: 0; left: 0; right: 0; max-width: 440px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 8px 20px; border-radius: 0; border-top: 1px solid rgba(139, 92, 246, 0.4); z-index: 30;">
-            <button onclick="switchTab('home')" style="background: none; color: #c084fc; display: flex; flex-direction: column; align-items: center; font-size: 10px; gap: 2px; cursor: pointer;">🏠<span>Home</span></button>
-            <button onclick="switchTab('activity')" style="background: none; color: #c084fc; opacity: 0.7; display: flex; flex-direction: column; align-items: center; font-size: 10px; gap: 2px; cursor: pointer;">🎮<span>Activity</span></button>
-            <button onclick="switchTab('win')" style="background: linear-gradient(135deg, #7c3aed, #db2777); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; box-shadow: 0 0 20px rgba(139,92,246,0.6); cursor: pointer; position: relative; top: -10px;">🎡</button>
-            <button onclick="switchTab('promotion')" style="background: none; color: #c084fc; opacity: 0.7; display: flex; flex-direction: column; align-items: center; font-size: 10px; gap: 2px; cursor: pointer;">👥<span>Promotion</span></button>
-            <button onclick="switchTab('account')" style="background: none; color: #c084fc; opacity: 0.7; display: flex; flex-direction: column; align-items: center; font-size: 10px; gap: 2px; cursor: pointer;">👤<span>Account</span></button>
-        </nav>
-    </div>
-
-    <!-- Modals -->
-    <div id="notificationModal" class="modal-overlay">
-        <div class="glass-card glow-purple" style="max-width: 320px; width: 100%; position: relative;">
-            <button onclick="closeNotificationModal()" style="position: absolute; top: 12px; right: 14px; background: none; color: #c084fc; font-size: 14px; cursor: pointer;">❌</button>
-            <h3 style="font-size: 14px; font-weight: 700; color: white; margin-bottom: 10px;">📢 Announcements</h3>
-            <div style="font-size: 11px; color: #c084fc; background: rgba(30,15,60,0.8); padding: 10px; border-radius: 10px; border: 1px solid rgba(139,92,246,0.3);">
-                <p style="font-weight: 700; color: #fde047;">🎉 Safe & Secure Transactions</p>
-                <p style="margin-top: 4px;">Submit official UTR after UPI payment in your Account section. Admin verifies and credits balance instantly.</p>
+    <!-- Deposit Modal (UPI ID: shubham77sah@fam) -->
+    <div id="depositModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
+        <div class="glass p-6 rounded-xl max-w-sm w-full space-y-4">
+            <h3 class="font-bold text-lg text-emerald-400">Deposit via UPI</h3>
+            <p class="text-xs text-slate-300">Send money to official UPI ID:</p>
+            <div class="bg-slate-800 p-2 rounded font-mono text-center text-yellow-400 font-bold">shubham77sah@fam</div>
+            <input type="number" id="depositAmountInput" placeholder="Enter Amount" class="w-full bg-slate-900 p-2 rounded text-sm border border-slate-700">
+            <input type="text" id="depositUtrInput" placeholder="Enter UTR / Transaction ID" class="w-full bg-slate-900 p-2 rounded text-sm border border-slate-700">
+            <div class="flex space-x-2">
+                <button onclick="closeDepositModal()" class="w-1/2 bg-slate-700 py-2 rounded text-sm">Cancel</button>
+                <button onclick="submitDepositRequest()" class="w-1/2 bg-emerald-600 py-2 rounded text-sm font-bold">Submit</button>
             </div>
         </div>
     </div>
 
-    <div id="depositModal" class="modal-overlay">
-        <div class="glass-card glow-purple" style="max-width: 320px; width: 100%; position: relative;">
-            <button onclick="closeDepositModal()" style="position: absolute; top: 12px; right: 14px; background: none; color: #c084fc; font-size: 14px; cursor: pointer;">❌</button>
-            <h3 style="font-size: 14px; font-weight: 700; color: white; margin-bottom: 4px;">📥 Deposit Funds</h3>
-            <p style="font-size: 11px; color: #c084fc; margin-bottom: 12px;">Pay via UPI & submit UTR.</p>
-            <div style="background: rgba(30, 15, 60, 0.9); padding: 10px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.4); display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <div>
-                    <p style="font-size: 9px; color: #c084fc;">Official UPI ID</p>
-                    <p style="font-size: 13px; font-family: monospace; font-weight: 700; color: #fde047;">shubham77sah@fam</p>
-                </div>
-                <button onclick="copyUpi()" style="background: #7c3aed; color: white; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">Copy</button>
-            </div>
-            <input type="number" id="depositAmount" placeholder="Enter Amount (Min ₹100)" class="input-field">
-            <input type="text" id="utrNumber" placeholder="Enter 12-digit UTR Number" class="input-field">
-            <button onclick="submitDepositRequest()" class="btn-primary" style="background: linear-gradient(135deg, #16a34a, #0d9488);">Submit UTR to Admin</button>
-        </div>
-    </div>
-
-    <div id="withdrawModal" class="modal-overlay">
-        <div class="glass-card glow-purple" style="max-width: 320px; width: 100%; position: relative;">
-            <button onclick="closeWithdrawModal()" style="position: absolute; top: 12px; right: 14px; background: none; color: #c084fc; font-size: 14px; cursor: pointer;">❌</button>
-            <h3 style="font-size: 14px; font-weight: 700; color: white; margin-bottom: 4px;">📤 Withdraw Funds</h3>
-            <p style="font-size: 11px; color: #c084fc; margin-bottom: 12px;">Send withdrawal request to admin.</p>
-            <input type="number" id="withdrawAmount" placeholder="Amount (₹)" class="input-field">
-            <input type="text" id="withdrawUpi" placeholder="Enter UPI ID / Bank Details" class="input-field">
-            <button onclick="submitWithdrawRequest()" class="btn-primary" style="background: linear-gradient(135deg, #dc2626, #991b1b);">Submit Withdrawal</button>
-        </div>
-    </div>
-
-    <div id="giftModal" class="modal-overlay">
-        <div class="glass-card glow-purple" style="max-width: 320px; width: 100%; position: relative;">
-            <button onclick="closeGiftModal()" style="position: absolute; top: 12px; right: 14px; background: none; color: #c084fc; font-size: 14px; cursor: pointer;">❌</button>
-            <h3 style="font-size: 14px; font-weight: 700; color: white; margin-bottom: 4px;">🎁 Redeem Gift Code</h3>
-            <p style="font-size: 11px; color: #c084fc; margin-bottom: 12px;">Enter coupon code to claim reward.</p>
-            <input type="text" id="giftCodeInput" placeholder="e.g. NEXUS2026" class="input-field" style="text-transform: uppercase;">
-            <button onclick="redeemGiftCode()" class="btn-primary" style="background: linear-gradient(135deg, #db2777, #9333ea);">Redeem Code</button>
-        </div>
-    </div>
-
-    <div id="supportModal" class="modal-overlay">
-        <div class="glass-card glow-purple" style="max-width: 320px; width: 100%; position: relative;">
-            <button onclick="closeSupportModal()" style="position: absolute; top: 12px; right: 14px; background: none; color: #c084fc; font-size: 14px; cursor: pointer;">❌</button>
-            <h3 style="font-size: 14px; font-weight: 700; color: white; margin-bottom: 10px;">🎧 Live Customer Service</h3>
-            <div id="chatBox" style="background: rgba(30,15,60,0.9); height: 140px; border-radius: 12px; padding: 10px; overflow-y: auto; font-size: 11px; margin-bottom: 10px; border: 1px solid rgba(139,92,246,0.3);">
-                <div style="background: rgba(124,58,237,0.3); padding: 8px; border-radius: 8px; color: #e9d5ff;">🤖 Hello! Provide your UID and UTR for deposit assistance.</div>
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <input type="text" id="chatInput" placeholder="Type message..." class="input-field" style="margin-bottom: 0;">
-                <button onclick="sendSupport()" style="background: #7c3aed; color: white; padding: 0 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer;">Send</button>
+    <!-- Withdraw Modal (Bank Account & UPI Only) -->
+    <div id="withdrawModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
+        <div class="glass p-6 rounded-xl max-w-sm w-full space-y-4">
+            <h3 class="font-bold text-lg text-blue-400">Withdraw Funds</h3>
+            <p class="text-xs text-slate-300">Registered Bank: <span class="text-yellow-400">5234078657 (CBIN0281356)</span></p>
+            <input type="number" id="withdrawAmountInput" placeholder="Amount" class="w-full bg-slate-900 p-2 rounded text-sm border border-slate-700">
+            <select id="withdrawMethod" class="w-full bg-slate-900 p-2 rounded text-sm border border-slate-700">
+                <option value="Bank">Bank Account (5234078657 - CBIN0281356)</option>
+                <option value="UPI">UPI (shubham77sah@fam)</option>
+            </select>
+            <div class="flex space-x-2">
+                <button onclick="closeWithdrawModal()" class="w-1/2 bg-slate-700 py-2 rounded text-sm">Cancel</button>
+                <button onclick="submitWithdrawRequest()" class="w-1/2 bg-blue-600 py-2 rounded text-sm font-bold">Request</button>
             </div>
         </div>
     </div>
 
-    <!-- Script file link -->
     <script src="script.js"></script>
 </body>
 </html>
